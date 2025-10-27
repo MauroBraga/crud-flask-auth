@@ -56,6 +56,52 @@ def create_user():
         return jsonify({'message':'User created successfully'}), 201
     return jsonify({'message':'Username and Password required'}), 400
 
+@app.route('/user/<int:id_user>', methods=['GET'])
+@login_required
+def get_user(id_user):
+    user = User.query.get(id_user)
+    if user:
+        return jsonify({'id': user.id, 'username': user.username}), 200
+    return jsonify({'message':'User not found'}), 404
+
+@app.route('/user/<int:id_user>', methods=['PUT'])
+@login_required
+def update_user(id_user):
+    data= request.get_json()
+    user = User.query.get(id_user)
+    if user:
+        username = data.get('username')
+        password = data.get('password')
+        if username and user.id != current_user().id:
+            user.username = username
+        if password:
+            user.password = password
+        db.session.commit()
+        return jsonify({'message':'User updated successfully'}), 200
+    return jsonify({'message':'User not found'}), 404
+
+@login_required
+@app.route('/user', methods=['GET'])
+def show_user():
+    users = User.query.all()
+    user_list = [{'id': user.id, 'username': user.username} for user in users]
+    return jsonify(user_list), 200
+
+
+@app.route('/user/<int:id_user>', methods=['DELETE'])
+@login_required
+def delete_user(id_user):
+    user = User.query.get(id_user)
+
+    if id_user==current_user.id:
+        return jsonify({'message':'You cannot delete your own account'}), 403
+
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message':'User deleted successfully'}), 200
+    return jsonify({'message':'User not found'}), 404
+
 @app.route('/hello-world', methods=['GET'])
 def hello_world():
     return 'Hello, World!', 200
