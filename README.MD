@@ -17,3 +17,8 @@ db.create_all()
 db.session.commit()
 
 user = User(username="admin",password="123") db.session.add(user) db.session.commit()
+
+
+ pip3 install -r requirements.txt --upgrade
+ 
+pip3 install bcrypt==4.1.2
